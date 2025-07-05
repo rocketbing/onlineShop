@@ -5,7 +5,7 @@
 
 // onMounted:
 // 组件已经挂载到DOM后，此时可以通过
-// 使用场景：适合执行需要访问DOM元素的操作，比如绑定DOM事件, 让input获得焦点等
+// 使用场景：适合执行需要访问DOM元素的操作，比如绑定DOM事件, 让input获得焦点，axios请求等
 // 注意：如果在本阶段发现获取DOM为null的情况，说明可能有异步渲染延迟，使用nextTick()解决
 
 // beforeUpdate:

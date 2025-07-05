@@ -24,16 +24,29 @@
         pattern="[\w]+@[A-Za-z]+(\.[A-Za-z0-9]+){1,2}"
         required
       />
-      <div class="mb-3 d-flex">
+      <div class="mb-3 position-relative">
         <input
-          type="password"
+          :type="isShow ? 'text' : 'password'"
           class="form-control"
           placeholder="Password"
           v-model="registForm.password"
           ref="passwordInput"
           required
         />
-        <button type="button" class="viewBtn">
+        <button
+          type="button"
+          class="viewBtn"
+          v-if="isShow"
+          @click="showPassword"
+        >
+          <font-awesome-icon :icon="['fas', 'eye-slash']" />
+        </button>
+        <button
+          type="button"
+          class="viewBtn"
+          v-if="!isShow"
+          @click="showPassword"
+        >
           <font-awesome-icon :icon="['fas', 'eye']" />
         </button>
       </div>
@@ -64,7 +77,7 @@
 import { reactive, ref, computed } from "vue";
 let registForm = reactive({ fname: "", lname: "", email: "", password: "" });
 let passwordInput = ref();
-console.log(passwordInput);
+let isShow = ref(true);
 let validation = [
   {
     rule: /[0-9]+/,
@@ -100,6 +113,10 @@ const progressBar = computed(() => {
   if (getPercentage.value < 60) return "bg-warning";
   return "bg-success";
 });
+function showPassword() {
+  isShow.value = !isShow.value;
+}
+console.log(isShow.value);
 </script>
 <style scoped lang="scss">
 .container {
@@ -116,11 +133,15 @@ const progressBar = computed(() => {
     width: 50%;
   }
   .viewBtn {
-    border: none;
     position: absolute;
-    left: 72vw;
-    top: 110vh;
-    background-color: #ffff;
+    top: 50%;
+    right: 1rem;
+    transform: translateY(-50%);
+    border: none;
+    background: transparent;
+    padding: 0;
+    color: #999;
+    font-size: 1.2rem;
   }
 }
 </style>
