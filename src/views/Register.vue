@@ -24,24 +24,30 @@
         pattern="[\w]+@[A-Za-z]+(\.[A-Za-z0-9]+){1,2}"
         required
       />
-      <input
-        type="password"
-        class="form-control mb-3"
-        placeholder="Password"
-        v-model="registForm.password"
-        required
-      />
+      <div class="mb-3 d-flex">
+        <input
+          type="password"
+          class="form-control"
+          placeholder="Password"
+          v-model="registForm.password"
+          ref="passwordInput"
+          required
+        />
+        <button type="button" class="viewBtn">
+          <font-awesome-icon :icon="['fas', 'eye']" />
+        </button>
+      </div>
       <div class="progress">
         <div
-          v-if="getPercentage() <= 40"
-          class="progress-bar bg-primary"
+          class="progress-bar"
+          :class="progressBar"
           role="progressbar"
-          style="width: 50%"
-          aria-valuenow="30"
+          :style="{ width: getPercentage + '%' }"
+          :aria-valuenow="getPercentage"
           aria-valuemin="0"
           aria-valuemax="100"
         >
-          {{ 40 }}
+          {{ getPercentage }}
         </div>
       </div>
       <button
@@ -55,10 +61,45 @@
   </div>
 </template>
 <script setup>
-import { reactive, ref } from "vue";
-let percentage = ref(50);
+import { reactive, ref, computed } from "vue";
 let registForm = reactive({ fname: "", lname: "", email: "", password: "" });
-function getPercentage(password) {}
+let passwordInput = ref();
+console.log(passwordInput);
+let validation = [
+  {
+    rule: /[0-9]+/,
+    credit: 20,
+  },
+  {
+    rule: /[A-Z]+/,
+    credit: 20,
+  },
+  {
+    rule: /[a-z]+/,
+    credit: 20,
+  },
+  {
+    rule: /[^A-Za-z0-9]/,
+    credit: 20,
+  },
+];
+let getPercentage = computed(() => {
+  let percentage = 0;
+  validation.forEach((item) => {
+    if (item.rule.test(registForm.password)) {
+      percentage += item.credit;
+    }
+    if (registForm.password.length >= 15) {
+      percentage += 20;
+    }
+  });
+  return percentage > 100 ? 100 : percentage;
+});
+const progressBar = computed(() => {
+  if (getPercentage.value < 40) return "bg-danger";
+  if (getPercentage.value < 60) return "bg-warning";
+  return "bg-success";
+});
 </script>
 <style scoped lang="scss">
 .container {
@@ -69,9 +110,17 @@ function getPercentage(password) {}
     width: 100%;
     text-align: start;
     padding: 1.5rem;
+    height: 50px;
   }
   .btn {
     width: 50%;
+  }
+  .viewBtn {
+    border: none;
+    position: absolute;
+    left: 72vw;
+    top: 110vh;
+    background-color: #ffff;
   }
 }
 </style>
