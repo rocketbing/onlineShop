@@ -26,3 +26,11 @@
 
 // computed
 // 缓存，computed里的依赖数据发生变化才会调用
+//   :type="item.type"
+//         :placeholder="item.placeholder"
+//         v-model="registForm[item.model]"
+//         :pattern="item.pattern"
+//         :required="item.required"
+//         :options="item.options"
+//         :name="item.model"
+//         :id="item.model"

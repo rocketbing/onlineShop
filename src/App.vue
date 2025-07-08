@@ -1,8 +1,6 @@
 <template>
   <Header></Header>
   <RouterView></RouterView>
-  <p>{{ sentence }}</p>
-  <button @click="getSentece">点我</button>
 </template>
 <script lang="js" setup>
 import Header from '@/components/Header.vue'

@@ -1,29 +1,14 @@
 <template>
   <div class="container d-flex flex-column align-items-start pt-3">
     <h1 class="pb-2 mb-5">Create Account</h1>
-    <form action="" class="w-100">
-      <input
-        type="text"
-        class="form-control mb-3"
-        placeholder="First name"
-        v-model="registForm.fname"
-        required
+    <form class="w-100" @submit.prevent="submitHandler">
+      <CustomInput
+        v-for="(item, index) in formList"
+        :key="index"
+        :inputAttrs="item"
+        v-model="registForm[item.model]"
       />
-      <input
-        type="text"
-        class="form-control mb-3"
-        placeholder="Last name"
-        v-model="registForm.lname"
-        required
-      />
-      <input
-        type="email"
-        class="form-control mb-3"
-        placeholder="Email"
-        v-model="registForm.email"
-        pattern="[\w]+@[A-Za-z]+(\.[A-Za-z0-9]+){1,2}"
-        required
-      />
+
       <div class="mb-3 position-relative">
         <input
           :type="isShow ? 'text' : 'password'"
@@ -33,23 +18,11 @@
           ref="passwordInput"
           required
         />
-        <button
-          type="button"
-          class="viewBtn"
-          v-if="isShow"
-          @click="showPassword"
-        >
-          <font-awesome-icon :icon="['fas', 'eye-slash']" />
-        </button>
-        <button
-          type="button"
-          class="viewBtn"
-          v-if="!isShow"
-          @click="showPassword"
-        >
-          <font-awesome-icon :icon="['fas', 'eye']" />
+        <button type="button" class="viewBtn" @click="showPassword">
+          <font-awesome-icon :icon="['fas', isShow ? 'eye-slash' : 'eye']" />
         </button>
       </div>
+
       <div class="progress">
         <div
           class="progress-bar"
@@ -73,51 +46,126 @@
     </form>
   </div>
 </template>
+
 <script setup>
+import CustomInput from "@/components/CustomInput.vue";
 import { reactive, ref, computed } from "vue";
-let registForm = reactive({ fname: "", lname: "", email: "", password: "" });
-let passwordInput = ref();
-let isShow = ref(true);
-let validation = [
+
+const registForm = reactive({
+  fname: "",
+  lname: "",
+  email: "",
+  password: "",
+  city: "",
+  gender: "",
+  hobby: [],
+  comment: "",
+  time: "",
+  count: "",
+});
+
+const formList = [
   {
-    rule: /[0-9]+/,
-    credit: 20,
+    type: "text",
+    model: "fname",
+    placeholder: "First name",
+    pattern: "[A-Za-z]+",
+    required: true,
   },
   {
-    rule: /[A-Z]+/,
-    credit: 20,
+    type: "text",
+    model: "lname",
+    placeholder: "Last name",
+    pattern: "[A-Za-z]+",
+    required: true,
   },
   {
-    rule: /[a-z]+/,
-    credit: 20,
+    type: "email",
+    model: "email",
+    placeholder: "Email",
+    pattern: "^(\\w)+(\\.\\w+)*@(\\w)+(\\.\\w+)+$",
+    required: true,
   },
   {
-    rule: /[^A-Za-z0-9]/,
-    credit: 20,
+    type: "select",
+    model: "city",
+    placeholder: "Choose your city",
+    options: ["北京", "上海", "深圳", "南京"],
+    required: true,
+  },
+  {
+    type: "radio",
+    model: "gender",
+    placeholder: "Choose your gender",
+    options: ["Male", "Female"],
+    required: true,
+  },
+  {
+    type: "checkbox",
+    model: "hobby",
+    placeholder: "Choose your hobby",
+    options: ["basketball", "football", "baseball"],
+  },
+  {
+    type: "textarea",
+    model: "comment",
+    cols: 30,
+    rows: 10,
+    placeholder: "Leave your comments",
+  },
+  {
+    type: "date",
+    model: "time",
+    placeholder: "Pick the date",
+    dateShown: "2025-07-08",
+    startDate: "1990-01-01",
+    endDate: "2050-01-01",
+  },
+  {
+    type: "number",
+    model: "count",
+    placeholder: "Choose a number",
+    minimum: "0",
+    maximum: "200",
   },
 ];
-let getPercentage = computed(() => {
+const isShow = ref(false);
+
+const validation = [
+  { rule: /[0-9]+/, credit: 20 },
+  { rule: /[A-Z]+/, credit: 20 },
+  { rule: /[a-z]+/, credit: 20 },
+  { rule: /[^A-Za-z0-9]/, credit: 20 },
+];
+
+const getPercentage = computed(() => {
   let percentage = 0;
   validation.forEach((item) => {
     if (item.rule.test(registForm.password)) {
       percentage += item.credit;
-    }
-    if (registForm.password.length >= 15) {
-      percentage += 20;
+      if (registForm.password.length >= 15) {
+        percentage += 20;
+      }
     }
   });
   return percentage > 100 ? 100 : percentage;
 });
+
 const progressBar = computed(() => {
   if (getPercentage.value < 40) return "bg-danger";
   if (getPercentage.value < 60) return "bg-warning";
   return "bg-success";
 });
+
 function showPassword() {
   isShow.value = !isShow.value;
 }
-console.log(isShow.value);
+
+function submitHandler() {
+  console.log("Form data:", registForm);
+}
 </script>
+
 <style scoped lang="scss">
 .container {
   width: 640px;

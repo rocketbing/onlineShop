@@ -17,6 +17,7 @@
     "@fortawesome/vue-fontawesome": "^3.0.8",
     "axios": "^1.10.0",
     "bootstrap": "^5.3.7",
+    "bootstrap-vue-next": "^0.30.3",
     "element-plus": "^2.10.2",
     "mitt": "^3.0.1",
     "pinia": "^3.0.3",
