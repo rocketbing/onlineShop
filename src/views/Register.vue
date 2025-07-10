@@ -1,61 +1,123 @@
 <template>
-  <div class="container d-flex flex-column align-items-start pt-3">
+  <BContainer
+    class="d-flex flex-column align-items-start pt-3"
+    style="max-width: 640px"
+  >
     <h1 class="pb-2 mb-5">Create Account</h1>
-    <form class="w-100" @submit.prevent="submitHandler">
+    <BForm class="w-100" @submit.prevent="submitHandler">
+      <!-- Dynamic form fields -->
       <CustomInput
         v-for="(item, index) in formList"
         :key="index"
         :inputAttrs="item"
         v-model="registForm[item.model]"
+        class="mb-3"
       />
 
-      <div class="mb-3 position-relative">
-        <input
-          :type="isShow ? 'text' : 'password'"
-          class="form-control"
-          placeholder="Password"
+      <!-- Password field -->
+      <BFormGroup class="position-relative mb-3">
+        <CustomInput
+          :inputAttrs="{
+            type: isShow ? 'text' : 'password',
+            model: 'password',
+            placeholder: 'Enter Password',
+            required: true,
+          }"
           v-model="registForm.password"
-          ref="passwordInput"
-          required
+          :state="!v$.password.complexity.$invalid"
         />
-        <button type="button" class="viewBtn" @click="showPassword">
-          <font-awesome-icon :icon="['fas', isShow ? 'eye-slash' : 'eye']" />
-        </button>
-      </div>
-
-      <div class="progress">
-        <div
-          class="progress-bar"
-          :class="progressBar"
-          role="progressbar"
-          :style="{ width: getPercentage + '%' }"
-          :aria-valuenow="getPercentage"
-          aria-valuemin="0"
-          aria-valuemax="100"
+        <BButton
+          variant="link"
+          :class="[
+            'viewBtn',
+            // Determine the style of the eyes icon
+            !v$.password.complexity.$invalid ? 'valid-btn' : 'invalid-btn',
+          ]"
+          @click="showPassword"
+          :aria-label="isShow ? 'Hide password' : 'Show password'"
         >
-          {{ getPercentage }}
-        </div>
-      </div>
-      <button
+          <font-awesome-icon :icon="['fas', isShow ? 'eye-slash' : 'eye']" />
+        </BButton>
+        <!-- password validation -->
+        <BFormInvalidFeedback :state="!v$.password.complexity.$invalid">
+          Your password should contain at least one Uppercase, one Lowercase,
+          one number and one special character.
+        </BFormInvalidFeedback>
+        <BFormValidFeedback :state="!v$.password.complexity.$invalid">
+          Looks Good.
+        </BFormValidFeedback>
+      </BFormGroup>
+      <BFormGroup class="position-relative mb-3">
+        <CustomInput
+          :inputAttrs="{
+            type: isShow ? 'text' : 'password',
+            model: 'confirmPassword',
+            placeholder: 'Please Confirm Password',
+            required: true,
+          }"
+          v-model="registForm.confirmPassword"
+          @input="v$.confirmPassword.$touch()"
+        />
+        <!-- password confirmation validation -->
+        <BFormInvalidFeedback :state="!v$.password.complexity.$invalid">
+          Your password should contain at least one Uppercase, one Lowercase,
+          one number and one special character.
+        </BFormInvalidFeedback>
+        <BFormValidFeedback :state="!v$.password.complexity.$invalid">
+          Looks Good.
+        </BFormValidFeedback>
+      </BFormGroup>
+
+      <!-- Password strength indicator -->
+      <BProgress
+        :value="passwordStrength"
+        :max="100"
+        height="1.5rem"
+        class="mb-3"
+      >
+        <BProgressBar
+          :variant="strengthVariant"
+          :value="passwordStrength"
+          :label="`${passwordStrength}%`"
+        />
+      </BProgress>
+
+      <!-- Submit button -->
+      <BButton
         type="submit"
-        class="btn btn-primary mt-3"
-        style="height: 60px; font-size: 1.5rem"
+        variant="primary"
+        size="lg"
+        class="mt-3 submit-btn"
       >
         CREATE
-      </button>
-    </form>
-  </div>
+      </BButton>
+    </BForm>
+  </BContainer>
 </template>
 
 <script setup>
 import CustomInput from "@/components/CustomInput.vue";
 import { reactive, ref, computed } from "vue";
+import {
+  BContainer,
+  BForm,
+  BButton,
+  BFormGroup,
+  BProgress,
+  BProgressBar,
+  BFormInvalidFeedback,
+  BFormValidFeedback,
+} from "bootstrap-vue-next";
+import { useVuelidate } from "@vuelidate/core";
+import { required, sameAs, minLength } from "@vuelidate/validators";
+import { watchEffect } from "vue";
 
 const registForm = reactive({
   fname: "",
   lname: "",
   email: "",
   password: "",
+  confirmPassword: "",
   city: "",
   gender: "",
   hobby: [],
@@ -105,56 +167,84 @@ const formList = [
     model: "hobby",
     placeholder: "Choose your hobby",
     options: ["basketball", "football", "baseball"],
+    required: true,
   },
   {
     type: "textarea",
     model: "comment",
-    cols: 30,
-    rows: 10,
     placeholder: "Leave your comments",
+    rows: 4,
+    required: true,
   },
   {
     type: "date",
     model: "time",
     placeholder: "Pick the date",
-    dateShown: "2025-07-08",
     startDate: "1990-01-01",
     endDate: "2050-01-01",
+    required: true,
   },
   {
     type: "number",
     model: "count",
     placeholder: "Choose a number",
-    minimum: "0",
-    maximum: "200",
+    min: 0,
+    max: 200,
+    required: true,
   },
 ];
+const passwordValue = computed(() => registForm.password);
+const rules = {
+  password: {
+    required,
+    minLength: minLength(5),
+    complexity: {
+      $validator: (value) => {
+        const hasUpper = /[A-Z]/.test(value);
+        const hasLower = /[a-z]/.test(value);
+        const hasNumber = /[0-9]/.test(value);
+        const hasSpecial = /[^A-Za-z0-9]/.test(value);
+        return hasUpper && hasLower && hasNumber && hasSpecial;
+      },
+    },
+    confirmPassword: {
+      required,
+      sameAs: sameAs(passwordValue),
+    },
+  },
+};
+
+const v$ = useVuelidate(rules, registForm);
+const isPasswordValid = computed(
+  () =>
+    v$.value.password.complexity.$dirty &&
+    !v$.value.password.complexity.$invalid
+);
 const isShow = ref(false);
-
-const validation = [
-  { rule: /[0-9]+/, credit: 20 },
-  { rule: /[A-Z]+/, credit: 20 },
-  { rule: /[a-z]+/, credit: 20 },
-  { rule: /[^A-Za-z0-9]/, credit: 20 },
-];
-
-const getPercentage = computed(() => {
-  let percentage = 0;
-  validation.forEach((item) => {
-    if (item.rule.test(registForm.password)) {
-      percentage += item.credit;
-      if (registForm.password.length >= 15) {
-        percentage += 20;
-      }
-    }
-  });
-  return percentage > 100 ? 100 : percentage;
+watchEffect(() => {
+  console.log(v$.value.password);
 });
 
-const progressBar = computed(() => {
-  if (getPercentage.value < 40) return "bg-danger";
-  if (getPercentage.value < 60) return "bg-warning";
-  return "bg-success";
+const passwordStrength = computed(() => {
+  const rules = [
+    { rule: /[0-9]+/, credit: 20 },
+    { rule: /[A-Z]+/, credit: 20 },
+    { rule: /[a-z]+/, credit: 20 },
+    { rule: /[^A-Za-z0-9]/, credit: 20 },
+  ];
+  let strength = rules.reduce(
+    (acc, { rule, credit }) =>
+      rule.test(registForm.password) ? acc + credit : acc,
+    0
+  );
+  if (registForm.password.length >= 12) strength += 20;
+  return Math.min(strength, 100);
+});
+
+const strengthVariant = computed(() => {
+  if (passwordStrength.value < 40) return "danger";
+  if (passwordStrength.value < 70) return "warning";
+  return "success";
 });
 
 function showPassword() {
@@ -162,34 +252,48 @@ function showPassword() {
 }
 
 function submitHandler() {
-  console.log("Form data:", registForm);
+  v$.value.$touch();
+  if (!v$.value.$invalid) {
+    console.log("Form submitted:", registForm);
+    // 这里添加实际提交逻辑
+  }
+  console.log(v$.value.$invalid);
 }
 </script>
 
 <style scoped lang="scss">
 .container {
-  width: 640px;
-  height: 510px;
   margin: 50px auto;
-  input {
-    width: 100%;
-    text-align: start;
-    padding: 1.5rem;
-    height: 50px;
-  }
-  .btn {
-    width: 50%;
-  }
+  padding-bottom: 50px;
+
   .viewBtn {
     position: absolute;
     top: 50%;
-    right: 1rem;
+    right: 2rem;
     transform: translateY(-50%);
-    border: none;
-    background: transparent;
-    padding: 0;
-    color: #999;
+    color: #6c757d;
     font-size: 1.2rem;
+    z-index: 10;
+  }
+  .valid-btn {
+    padding-top: 5px;
+    padding-bottom: 0;
+  }
+
+  .invalid-btn {
+    padding-bottom: 15px;
+    padding-top: 0;
+  }
+
+  .submit-btn {
+    height: 60px;
+    font-size: 1.5rem;
+    width: 50%;
+  }
+
+  :deep(.form-control) {
+    padding: 1rem 1.5rem;
+    height: 50px;
   }
 }
 </style>
