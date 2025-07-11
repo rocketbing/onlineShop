@@ -6,27 +6,28 @@
       :id="inputAttrs.model"
       v-model="modelValueProxy"
       :options="inputAttrs.options"
-      :required="inputAttrs.required"
-      class="mb-2"
+      :name="inputAttrs.model"
+      :state="state"
     />
 
     <!-- Radio -->
     <BFormRadioGroup
       v-else-if="inputAttrs.type === 'radio'"
+      :id="inputAttrs.model"
       v-model="modelValueProxy"
       :options="inputAttrs.options"
       :name="inputAttrs.model"
-      :required="inputAttrs.required"
-      class="mb-2"
+      :state="state"
     />
 
     <!-- Checkbox -->
     <BFormCheckboxGroup
       v-else-if="inputAttrs.type === 'checkbox'"
+      :id="inputAttrs.model"
       v-model="modelValueProxy"
       :options="inputAttrs.options"
       :name="inputAttrs.model"
-      class="mb-2"
+      :state="state"
     />
 
     <!-- Textarea -->
@@ -35,11 +36,11 @@
       :id="inputAttrs.model"
       v-model="modelValueProxy"
       :rows="inputAttrs.rows || 3"
-      :required="inputAttrs.required"
-      class="mb-2"
+      :name="inputAttrs.model"
+      :state="state"
     />
 
-    <!-- Date (use BFormInput with type='date') -->
+    <!-- Date -->
     <BFormInput
       v-else-if="inputAttrs.type === 'date'"
       :id="inputAttrs.model"
@@ -47,8 +48,8 @@
       type="date"
       :min="inputAttrs.startDate"
       :max="inputAttrs.endDate"
-      :required="inputAttrs.required"
-      class="mb-2"
+      :name="inputAttrs.model"
+      :state="state"
     />
 
     <!-- Number -->
@@ -59,8 +60,8 @@
       type="number"
       :min="inputAttrs.min"
       :max="inputAttrs.max"
-      :required="inputAttrs.required"
-      class="mb-2"
+      :name="inputAttrs.model"
+      :state="state"
     />
 
     <!-- Default Input -->
@@ -69,9 +70,8 @@
       :id="inputAttrs.model"
       v-model="modelValueProxy"
       :type="inputAttrs.type || 'text'"
-      :pattern="inputAttrs.pattern"
-      :required="inputAttrs.required"
-      class="mb-2"
+      :name="inputAttrs.model"
+      :state="state"
     />
   </BFormGroup>
 </template>
@@ -95,6 +95,10 @@ const props = defineProps({
   modelValue: {
     type: [String, Number, Boolean, Array],
     default: "",
+  },
+  state: {
+    type: Boolean,
+    default: null,
   },
 });
 

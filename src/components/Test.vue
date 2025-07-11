@@ -1,47 +1,47 @@
 <template>
   <div>
     <input
-      type="text"
-      v-model="password"
-      placeholder="Please enter your password"
-      @input="v$.password.$touch()"
+      type="email"
+      v-model="form.email"
+      placeholder="Please enter your email"
+      @input="v$.email.$touch()"
       style="display: block; width: 100%"
     />
-    <span v-if="v$.password.$invalid">{{ errorMessage.password }}</span>
-    <input
-      type="password"
-      v-model="confirmPassword"
-      placeholder="Please confirm your password"
-      style="display: block; width: 100%"
-    />
-    <span v-if="v$.confirmPassword.$invalid">{{
-      errorMessage.confirmPassword
-    }}</span>
+
+    <BFormInvalidFeedback>
+      {{ v$.email.required.$errors[0].$message }}
+    </BFormInvalidFeedback>
+
+    <BFormInvalidFeedback v-if="v$.email.$dirty && v$.email.email.$invalid">
+      {{ v$.email.email.$message }}
+    </BFormInvalidFeedback>
   </div>
 </template>
-<script setup lang="js">
-import { reactive, ref, computed} from 'vue'
-import { useVuelidate } from '@vuelidate/core'
-import { required, sameAs,minLength } from '@vuelidate/validators'
-let password = ref('')
-let confirmPassword = ref('')
-const passwordValue = computed(() => password.value)
+
+<script setup>
+import { reactive, watchEffect } from "vue";
+import { useVuelidate } from "@vuelidate/core";
+import { required, email } from "@vuelidate/validators";
+
+const form = reactive({
+  email: "",
+});
+
 const rules = {
-  password: {
-    required,
-    minLength: minLength(5)
-  },
-  confirmPassword: {
-    required,
-    sameAs: sameAs(passwordValue),
+  email: {
+    required: {
+      $validator: required,
+      $message: "Email is required",
+    },
+    email: {
+      $validator: email,
+      $message: "Email format is invalid",
+    },
   },
 };
-const errorMessage = {
-  password: 'Password less than 5',
-  confirmPassword: 'Password doesn\'t matched!'
-}
 
-const v$ = useVuelidate(rules, {password,confirmPassword});
-console.log(v$)
+const v$ = useVuelidate(rules, form);
+watchEffect(() => {
+  console.log(v$.value.email.required.$errors);
+});
 </script>
-<style scoped></style>

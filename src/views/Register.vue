@@ -4,85 +4,75 @@
     style="max-width: 640px"
   >
     <h1 class="pb-2 mb-5">Create Account</h1>
-    <BForm class="w-100" @submit.prevent="submitHandler">
-      <!-- Dynamic form fields -->
-      <CustomInput
-        v-for="(item, index) in formList"
-        :key="index"
-        :inputAttrs="item"
-        v-model="registForm[item.model]"
-        class="mb-3"
-      />
+    <BForm @submit.prevent="submitHandler" class="w-100">
+      <!-- Loop over each form field -->
+      <template v-for="(item, index) in formList" :key="index">
+        <BFormGroup class="position-relative mb-3">
+          <div class="position-relative">
+            <CustomInput
+              :inputAttrs="{
+                ...item,
+                type:
+                  item.type === 'password'
+                    ? isShow
+                      ? 'text'
+                      : 'password'
+                    : item.type,
+              }"
+              v-model="registForm[item.model]"
+              :state="
+                item.model === 'email' || item.model === 'confirmPassword'
+                  ? !v$[item.model].$invalid
+                  : !v$[item.model].complexity.$invalid
+              "
+              class="mb-3"
+            />
 
-      <!-- Password field -->
-      <BFormGroup class="position-relative mb-3">
-        <CustomInput
-          :inputAttrs="{
-            type: isShow ? 'text' : 'password',
-            model: 'password',
-            placeholder: 'Enter Password',
-            required: true,
-          }"
-          v-model="registForm.password"
-          :state="!v$.password.complexity.$invalid"
-        />
-        <BButton
-          variant="link"
-          :class="[
-            'viewBtn',
-            // Determine the style of the eyes icon
-            !v$.password.complexity.$invalid ? 'valid-btn' : 'invalid-btn',
-          ]"
-          @click="showPassword"
-          :aria-label="isShow ? 'Hide password' : 'Show password'"
-        >
-          <font-awesome-icon :icon="['fas', isShow ? 'eye-slash' : 'eye']" />
-        </BButton>
-        <!-- password validation -->
-        <BFormInvalidFeedback :state="!v$.password.complexity.$invalid">
-          Your password should contain at least one Uppercase, one Lowercase,
-          one number and one special character.
-        </BFormInvalidFeedback>
-        <BFormValidFeedback :state="!v$.password.complexity.$invalid">
-          Looks Good.
-        </BFormValidFeedback>
-      </BFormGroup>
-      <BFormGroup class="position-relative mb-3">
-        <CustomInput
-          :inputAttrs="{
-            type: isShow ? 'text' : 'password',
-            model: 'confirmPassword',
-            placeholder: 'Please Confirm Password',
-            required: true,
-          }"
-          v-model="registForm.confirmPassword"
-          @input="v$.confirmPassword.$touch()"
-        />
-        <!-- password confirmation validation -->
-        <BFormInvalidFeedback :state="!v$.password.complexity.$invalid">
-          Your password should contain at least one Uppercase, one Lowercase,
-          one number and one special character.
-        </BFormInvalidFeedback>
-        <BFormValidFeedback :state="!v$.password.complexity.$invalid">
-          Looks Good.
-        </BFormValidFeedback>
-      </BFormGroup>
+            <!-- Password validation -->
+            <div v-if="item.model == 'password'">
+              <PasswordRevealButton
+                v-model="isShow"
+                :isValid="!v$.password.complexity.$invalid"
+              />
 
-      <!-- Password strength indicator -->
-      <BProgress
-        :value="passwordStrength"
-        :max="100"
-        height="1.5rem"
-        class="mb-3"
-      >
-        <BProgressBar
-          :variant="strengthVariant"
-          :value="passwordStrength"
-          :label="`${passwordStrength}%`"
-        />
-      </BProgress>
+              <BProgress
+                :value="passwordStrength"
+                :max="100"
+                height="1.5rem"
+                class="mb-3"
+              >
+                <BProgressBar
+                  :variant="strengthVariant"
+                  :value="passwordStrength"
+                  :label="`${passwordStrength}%`"
+                />
+              </BProgress>
+            </div>
 
-      <!-- Submit button -->
+            <!-- Validation message -->
+            <BFormInvalidFeedback
+              v-if="v$[item.model].complexity"
+              :state="!v$[item.model].complexity.$invalid"
+            >
+              {{ v$[item.model].complexity.$message }}
+            </BFormInvalidFeedback>
+            <BFormInvalidFeedback
+              v-if="item.model === 'email'"
+              :state="!v$[item.model].$invalid"
+            >
+              Please enter valid email
+            </BFormInvalidFeedback>
+            <BFormInvalidFeedback
+              v-if="item.model === 'confirmPassword'"
+              :state="!v$[item.model].$invalid"
+            >
+              Password doesn't matched!
+            </BFormInvalidFeedback>
+          </div>
+        </BFormGroup>
+      </template>
+
+      <!-- Submit -->
       <BButton
         type="submit"
         variant="primary"
@@ -97,7 +87,8 @@
 
 <script setup>
 import CustomInput from "@/components/CustomInput.vue";
-import { reactive, ref, computed } from "vue";
+import PasswordRevealButton from "@/components/PasswordRevealButton.vue";
+import { reactive, ref, computed, watchEffect } from "vue";
 import {
   BContainer,
   BForm,
@@ -106,12 +97,11 @@ import {
   BProgress,
   BProgressBar,
   BFormInvalidFeedback,
-  BFormValidFeedback,
 } from "bootstrap-vue-next";
 import { useVuelidate } from "@vuelidate/core";
-import { required, sameAs, minLength } from "@vuelidate/validators";
-import { watchEffect } from "vue";
+import { required, sameAs, minLength, email } from "@vuelidate/validators";
 
+// 表单数据
 const registForm = reactive({
   fname: "",
   lname: "",
@@ -126,55 +116,40 @@ const registForm = reactive({
   count: "",
 });
 
+// 字段定义（用于动态渲染表单）
 const formList = [
+  { type: "text", model: "fname", placeholder: "First name" },
+  { type: "text", model: "lname", placeholder: "Last name" },
+  { type: "email", model: "email", placeholder: "Email" },
+  { type: "password", model: "password", placeholder: "Enter your password" },
   {
-    type: "text",
-    model: "fname",
-    placeholder: "First name",
-    pattern: "[A-Za-z]+",
-    required: true,
-  },
-  {
-    type: "text",
-    model: "lname",
-    placeholder: "Last name",
-    pattern: "[A-Za-z]+",
-    required: true,
-  },
-  {
-    type: "email",
-    model: "email",
-    placeholder: "Email",
-    pattern: "^(\\w)+(\\.\\w+)*@(\\w)+(\\.\\w+)+$",
-    required: true,
+    type: "password",
+    model: "confirmPassword",
+    placeholder: "Confirm your password",
   },
   {
     type: "select",
     model: "city",
     placeholder: "Choose your city",
     options: ["北京", "上海", "深圳", "南京"],
-    required: true,
   },
   {
     type: "radio",
     model: "gender",
     placeholder: "Choose your gender",
     options: ["Male", "Female"],
-    required: true,
   },
   {
     type: "checkbox",
     model: "hobby",
     placeholder: "Choose your hobby",
     options: ["basketball", "football", "baseball"],
-    required: true,
   },
   {
     type: "textarea",
     model: "comment",
     placeholder: "Leave your comments",
     rows: 4,
-    required: true,
   },
   {
     type: "date",
@@ -182,7 +157,6 @@ const formList = [
     placeholder: "Pick the date",
     startDate: "1990-01-01",
     endDate: "2050-01-01",
-    required: true,
   },
   {
     type: "number",
@@ -190,11 +164,32 @@ const formList = [
     placeholder: "Choose a number",
     min: 0,
     max: 200,
-    required: true,
   },
 ];
+
+// 密码绑定
 const passwordValue = computed(() => registForm.password);
+
+// 表单验证规则
 const rules = {
+  fname: {
+    required,
+    complexity: {
+      $validator: (value) => /^[A-Za-z]+$/.test(value),
+      $message: "Please enter a valid first name",
+    },
+  },
+  lname: {
+    required,
+    complexity: {
+      $validator: (value) => /^[A-Za-z]+$/.test(value),
+      $message: "Please enter a valid last name",
+    },
+  },
+  email: {
+    required,
+    email,
+  },
   password: {
     required,
     minLength: minLength(5),
@@ -206,25 +201,71 @@ const rules = {
         const hasSpecial = /[^A-Za-z0-9]/.test(value);
         return hasUpper && hasLower && hasNumber && hasSpecial;
       },
+      $message:
+        "Password must contain uppercase, lowercase, number, and special character.",
     },
-    confirmPassword: {
-      required,
-      sameAs: sameAs(passwordValue),
+  },
+  confirmPassword: {
+    required,
+    sameAs: sameAs(passwordValue),
+    complexity: {
+      $message: "Password doesn't matched!",
+    },
+  },
+  city: {
+    required,
+    complexity: {
+      $validator: (value) => value !== "",
+      $message: "Please select your city",
+    },
+  },
+  gender: {
+    required,
+    complexity: {
+      $validator: (value) => value !== "",
+      $message: "Please select your gender",
+    },
+  },
+  hobby: {
+    required,
+    complexity: {
+      $validator: (value) => value.length > 0,
+      $message: "Please select at least one hobby",
+    },
+  },
+  comment: {
+    required,
+    complexity: {
+      $validator: (value) => value.trim() !== "",
+      $message: "Please give us some comment!",
+    },
+  },
+  time: {
+    required,
+    complexity: {
+      $validator: (value) => value !== "",
+      $message: "Please select the time",
+    },
+  },
+  count: {
+    required,
+    complexity: {
+      $validator: (value) => value !== "",
+      $message: "Please select a number",
     },
   },
 };
 
 const v$ = useVuelidate(rules, registForm);
-const isPasswordValid = computed(
-  () =>
-    v$.value.password.complexity.$dirty &&
-    !v$.value.password.complexity.$invalid
-);
-const isShow = ref(false);
-watchEffect(() => {
-  console.log(v$.value.password);
-});
 
+// 控制密码显示
+const isShow = ref(false);
+
+function showPassword() {
+  isShow.value = !isShow.value;
+}
+
+// 计算密码强度
 const passwordStrength = computed(() => {
   const rules = [
     { rule: /[0-9]+/, credit: 20 },
@@ -241,24 +282,24 @@ const passwordStrength = computed(() => {
   return Math.min(strength, 100);
 });
 
+// 强度样式
 const strengthVariant = computed(() => {
   if (passwordStrength.value < 40) return "danger";
   if (passwordStrength.value < 70) return "warning";
   return "success";
 });
 
-function showPassword() {
-  isShow.value = !isShow.value;
-}
-
+// 提交处理
 function submitHandler() {
   v$.value.$touch();
   if (!v$.value.$invalid) {
     console.log("Form submitted:", registForm);
-    // 这里添加实际提交逻辑
+    // 提交逻辑
   }
-  console.log(v$.value.$invalid);
 }
+watchEffect(() => {
+  console.log(v$.value);
+});
 </script>
 
 <style scoped lang="scss">
@@ -275,13 +316,14 @@ function submitHandler() {
     font-size: 1.2rem;
     z-index: 10;
   }
+
   .valid-btn {
-    padding-top: 5px;
-    padding-bottom: 0;
+    padding-top: 0px;
+    padding-bottom: 5px;
   }
 
   .invalid-btn {
-    padding-bottom: 15px;
+    padding-bottom: 42px;
     padding-top: 0;
   }
 
@@ -289,11 +331,6 @@ function submitHandler() {
     height: 60px;
     font-size: 1.5rem;
     width: 50%;
-  }
-
-  :deep(.form-control) {
-    padding: 1rem 1.5rem;
-    height: 50px;
   }
 }
 </style>
