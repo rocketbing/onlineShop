@@ -1,27 +1,7 @@
-<template>
-  <div>
-    <input
-      type="email"
-      v-model="form.email"
-      placeholder="Please enter your email"
-      @input="v$.email.$touch()"
-      style="display: block; width: 100%"
-    />
-
-    <BFormInvalidFeedback>
-      {{ v$.email.required.$errors[0].$message }}
-    </BFormInvalidFeedback>
-
-    <BFormInvalidFeedback v-if="v$.email.$dirty && v$.email.email.$invalid">
-      {{ v$.email.email.$message }}
-    </BFormInvalidFeedback>
-  </div>
-</template>
-
 <script setup>
 import { reactive, watchEffect } from "vue";
 import { useVuelidate } from "@vuelidate/core";
-import { required, email } from "@vuelidate/validators";
+import { required, withMessage } from "@vuelidate/validators";
 
 const form = reactive({
   email: "",
@@ -29,19 +9,13 @@ const form = reactive({
 
 const rules = {
   email: {
-    required: {
-      $validator: required,
-      $message: "Email is required",
-    },
-    email: {
-      $validator: email,
-      $message: "Email format is invalid",
-    },
+    required: withMessage("Email is required", required),
   },
 };
 
 const v$ = useVuelidate(rules, form);
+
 watchEffect(() => {
-  console.log(v$.value.email.required.$errors);
+  console.log(v$.value.email.required.$message); // 正常应该输出 message
 });
 </script>
