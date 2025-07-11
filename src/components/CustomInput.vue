@@ -76,7 +76,6 @@
         :state="state"
       />
     </template>
-
     <!-- 密码字段 -->
     <template v-else>
       <div class="position-relative">
@@ -107,6 +106,7 @@
         />
       </BProgress>
     </template>
+    <slot></slot>
   </BFormGroup>
 </template>
 

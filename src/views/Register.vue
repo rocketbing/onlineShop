@@ -21,59 +21,58 @@
               }"
               v-model="registForm[item.model]"
               :state="!v$[item.model].$invalid"
-            />
-            <!-- Validation message -->
-            <!-- All required -->
-            <BFormInvalidFeedback
-              v-if="
-                v$[item.model].required.$invalid &&
-                item.model !== 'confirmPassword'
-              "
-              :state="!v$[item.model].required.$invalid"
             >
-              {{ item.name }} is required
-            </BFormInvalidFeedback>
+              <BFormInvalidFeedback
+                v-if="
+                  v$[item.model].required.$invalid &&
+                  item.model !== 'confirmPassword'
+                "
+                :state="!v$[item.model].required.$invalid"
+              >
+                {{ item.name }} is required
+              </BFormInvalidFeedback>
 
-            <!-- Email -->
-            <BFormInvalidFeedback
-              v-if="item.model === 'email' && v$[item.model].email.$invalid"
-              :state="!v$[item.model].email.$invalid"
-            >
-              Please enter valid email
-            </BFormInvalidFeedback>
+              <!-- Email -->
+              <BFormInvalidFeedback
+                v-if="item.model === 'email' && v$[item.model].email.$invalid"
+                :state="!v$[item.model].email.$invalid"
+              >
+                Please enter valid email
+              </BFormInvalidFeedback>
 
-            <!-- First Name -->
-            <BFormInvalidFeedback
-              v-if="
-                ['lname', 'fname'].indexOf(item.model) !== -1 &&
-                v$[item.model].onlyLetters.$invalid
-              "
-              :state="!v$[item.model].onlyLetters.$invalid"
-            >
-              {{ v$[item.model].onlyLetters.$message }}
-            </BFormInvalidFeedback>
+              <!-- First Name -->
+              <BFormInvalidFeedback
+                v-if="
+                  ['lname', 'fname'].indexOf(item.model) !== -1 &&
+                  v$[item.model].onlyLetters.$invalid
+                "
+                :state="!v$[item.model].onlyLetters.$invalid"
+              >
+                {{ v$[item.model].onlyLetters.$message }}
+              </BFormInvalidFeedback>
 
-            <!-- Password -->
-            <BFormInvalidFeedback
-              v-if="
-                item.model === 'password' &&
-                v$[item.model].complexPassword.$invalid
-              "
-              :state="!v$[item.model].complexPassword.$invalid"
-            >
-              {{ v$[item.model].complexPassword.$message }}
-            </BFormInvalidFeedback>
+              <!-- Password -->
+              <BFormInvalidFeedback
+                v-if="
+                  item.model === 'password' &&
+                  v$[item.model].complexPassword.$invalid
+                "
+                :state="!v$[item.model].complexPassword.$invalid"
+              >
+                {{ v$[item.model].complexPassword.$message }}
+              </BFormInvalidFeedback>
 
-            <!-- Password Confirmation -->
-            <BFormInvalidFeedback
-              v-if="
-                item.model === 'confirmPassword' &&
-                v$[item.model].sameAs.$invalid
-              "
-              :state="!v$[item.model].sameAs.$invalid"
-            >
-              Password doesn't matched
-            </BFormInvalidFeedback>
+              <!-- Password Confirmation -->
+              <BFormInvalidFeedback
+                v-if="
+                  item.model === 'confirmPassword' &&
+                  v$[item.model].sameAs.$invalid
+                "
+                :state="!v$[item.model].sameAs.$invalid"
+              >
+                Password doesn't matched
+              </BFormInvalidFeedback>
+            </CustomInput>
           </div>
         </BFormGroup>
       </template>
