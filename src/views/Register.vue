@@ -133,11 +133,13 @@ const formList = [
     model: "password",
     placeholder: "Enter your password",
     name: "Password",
+    needStrength: true,
   },
   {
     type: "password",
     model: "confirmPassword",
     placeholder: "Confirm your password",
+    needStrength: true,
   },
   {
     type: "select",

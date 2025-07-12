@@ -93,7 +93,7 @@
 
       <!-- 强度条 -->
       <BProgress
-        v-if="inputAttrs.model === 'password'"
+        v-if="inputAttrs.model === 'password' && inputAttrs.needStrength"
         :value="passwordStrength"
         :max="100"
         height="1.5rem"
@@ -179,7 +179,7 @@ const strengthVariant = computed(() => {
 });
 </script>
 
-<style scoped>
+<style scoped lang="scss">
 .viewBtn {
   position: absolute;
   top: 50%;
@@ -188,5 +188,8 @@ const strengthVariant = computed(() => {
   color: #6c757d;
   font-size: 1.2rem;
   z-index: 10;
+  &:hover {
+    color: blue;
+  }
 }
 </style>

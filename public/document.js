@@ -34,3 +34,18 @@
 //         :options="item.options"
 //         :name="item.model"
 //         :id="item.model"
+
+// 项目相关注意点总结:
+// 1. CustomInput封装实现双向绑定方法: :modelValue = "" + @input/@change = emit("updateModelValue", newValue)
+// 2. v-if和v-else-if的区别，v-else-if只取第一个匹配条件的组件, v-if会渲染所有符合条件的组件
+// 3. slot的位置
+// 4. 封装好组件之后要注意检查删除原组件里多余无用的代码和import引入
+// 5. CustomInput组件上的state负责展示通过验证前后样式的(未通过显示红色边框，通过之后变为绿色+对钩)
+//    validFeedback上的state负责展示验证失败错误信息
+// 6. rules里confirmPassword的sameAs规则需要传入一个computed的passwordvalue值，这样可以实时监测到值的变化
+// 7. rules里的自定义规则名字一般要按照满足规则所达到的效果来制定，比如mustContainOneLetter
+// 8. BFormInvalidFeedback一般是按照v-if特定的条件来渲染特定的错误信息，比如不满足required要求显示必填，满足required但没有大写字母显示需要大写字母
+// 9. 当store里有token的时候，放在axios请求拦截器的请求头
+// 10. axios请求拦截器请求头还可以设置数据类型，告诉后端要发送什么类型的数据
+// 11. Errormessage显示的样式(elment plus)一般封装在axios里，因为每次axios请求都要用到
+// 12. axios不同的错误代码应该对应不同的处理方式，比如401要清除本地token，并且跳转到login
