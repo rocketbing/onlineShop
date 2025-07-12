@@ -1,6 +1,6 @@
 <template>
   <div class="container pt-3" style="max-width: 640px">
-    <h1 class="pb-2">Login</h1>
+    <h1 class="pb-2">Login1</h1>
     <div class="d-flex gap-3 py-3 align-items-center">
       <h5 class="mb-0 text-secondary">Don't have an account yet?</h5>
       <a class="text-primary" @click="goToRegister">Create account</a>
