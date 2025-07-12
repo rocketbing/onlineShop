@@ -2,31 +2,31 @@ name: Deploy Vue App to Server
 
 on:
   push:
-    branches: [main]  # 你可以改成你用的分支
+    branches: [main] # 你可以改成你用的分支
 
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout Code
-      uses: actions/checkout@v3
+      - name: Checkout Code
+        uses: actions/checkout@v3
 
-    - name: Setup Node.js
-      uses: actions/setup-node@v3
-      with:
-        node-version: 18
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
 
-    - name: Install dependencies
-      run: npm install
+      - name: Install dependencies
+        run: npm install
 
-    - name: Build Vue App
-      run: npm run build
+      - name: Build Vue App
+        run: npm run build
 
-    - name: Deploy via SSH
-      uses: appleboy/scp-action@v0.1.6
-      with:
-        host: ${{ secrets.SSH_HOST }}
-        key: ${{ secrets.SSH_PRIVATE_KEY }}
-        source: "dist/*"
-        target: ${{ secrets.REMOTE_PATH }}
+      - name: Deploy via SSH
+        uses: appleboy/scp-action@v0.1.6
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          source: "dist/*"
+          target: ${{ secrets.REMOTE_PATH }}
