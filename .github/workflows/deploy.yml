@@ -23,10 +23,20 @@ jobs:
       - name: Build Vue App
         run: npm run build
 
-      - name: Deploy via SSH
-        uses: appleboy/scp-action@v0.1.6
+      - name: Copy files to server via SSH
+        uses: appleboy/scp-action@v0.1.7
         with:
           host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.REMOTE_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           source: "dist/*"
           target: ${{ secrets.REMOTE_PATH }}
+
+      - name: SSH into server and restart services (optional)
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.REMOTE_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            echo "Deployment complete"
