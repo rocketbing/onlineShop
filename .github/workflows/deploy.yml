@@ -23,7 +23,7 @@ jobs:
       - name: Build Vue App
         run: npm run build
 
-      - name: Clean old files
+      - name: Clean old files on server
         uses: appleboy/ssh-action@v1.0.3
         with:
             host: ${{ secrets.SSH_HOST }}
@@ -33,14 +33,15 @@ jobs:
              rm -rf ${{ secrets.REMOTE_PATH }}/*
             fail_on_std_err: true
 
-      - name: Copy files to server via SSH
+      - name: Upload built files to server (no dist/)
         uses: appleboy/scp-action@v0.1.7
         with:
-          host: ${{ secrets.SSH_HOST }}
-          username: ${{ secrets.REMOTE_USER }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          source: "dist/*"
-          target: ${{ secrets.REMOTE_PATH }}
+            host: ${{ secrets.SSH_HOST }}
+            username: ${{ secrets.REMOTE_USER }}
+            key: ${{ secrets.SSH_PRIVATE_KEY }}
+            source: "dist/**"
+            target: ${{ secrets.REMOTE_PATH }}
+            strip_components: 1
 
       - name: SSH into server and restart services (optional)
         uses: appleboy/ssh-action@v1.0.3
