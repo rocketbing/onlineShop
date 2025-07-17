@@ -78,12 +78,7 @@
       </template>
 
       <!-- Submit -->
-      <BButton
-        type="submit"
-        variant="primary"
-        size="lg"
-        class="mt-3 submit-btn"
-      >
+      <BButton type="submit" variant="dark" size="lg" class="mt-3 submit-btn">
         CREATE
       </BButton>
     </BForm>
@@ -92,6 +87,7 @@
 
 <script setup>
 import CustomInput from "@/components/CustomInput.vue";
+import { useRouter } from "vue-router";
 import { reactive, ref, computed, watchEffect } from "vue";
 import {
   BContainer,
@@ -102,7 +98,10 @@ import {
 } from "bootstrap-vue-next";
 import { useVuelidate } from "@vuelidate/core";
 import { required, sameAs, minLength, email } from "@vuelidate/validators";
-
+import { useUserStore } from "@/store/user.js";
+import { ElNotification } from "element-plus";
+const userStore = useUserStore();
+const router = useRouter();
 // 表单数据
 const registForm = reactive({
   fname: "",
@@ -110,14 +109,14 @@ const registForm = reactive({
   email: "",
   password: "",
   confirmPassword: "",
-  city: "",
-  gender: "",
-  hobby: [],
-  comment: "",
-  time: "",
-  count: "",
 });
-
+const uploadForm = computed(() => {
+  return {
+    username: registForm.fname + " " + registForm.lname,
+    email: registForm.email,
+    password: registForm.password,
+  };
+});
 // 字段定义（用于动态渲染表单）
 const formList = [
   {
@@ -140,50 +139,6 @@ const formList = [
     model: "confirmPassword",
     placeholder: "Confirm your password",
     needStrength: true,
-  },
-  {
-    type: "select",
-    model: "city",
-    placeholder: "Choose your city",
-    options: ["北京", "上海", "深圳", "南京"],
-    name: "City",
-  },
-  {
-    type: "radio",
-    model: "gender",
-    placeholder: "Choose your gender",
-    options: ["Male", "Female"],
-    name: "Gender",
-  },
-  {
-    type: "checkbox",
-    model: "hobby",
-    placeholder: "Choose your hobby",
-    options: ["basketball", "football", "baseball"],
-    name: "Hobby",
-  },
-  {
-    type: "textarea",
-    model: "comment",
-    placeholder: "Leave your comments",
-    rows: 4,
-    name: "Comments",
-  },
-  {
-    type: "date",
-    model: "time",
-    placeholder: "Pick the date",
-    startDate: "1990-01-01",
-    endDate: "2050-01-01",
-    name: "Date",
-  },
-  {
-    type: "number",
-    model: "count",
-    placeholder: "Choose a number",
-    min: 0,
-    max: 200,
-    name: "Number",
   },
 ];
 
@@ -245,24 +200,6 @@ const rules = {
     required,
     sameAs: sameAs(passwordValue),
   },
-  city: {
-    required,
-  },
-  gender: {
-    required,
-  },
-  hobby: {
-    required,
-  },
-  comment: {
-    required,
-  },
-  time: {
-    required,
-  },
-  count: {
-    required,
-  },
 };
 
 const v$ = useVuelidate(rules, registForm);
@@ -273,7 +210,12 @@ const isShow = ref(false);
 // 提交处理
 function submitHandler() {
   if (!v$.value.$invalid) {
-    console.log("Form submitted:", registForm);
+    userStore.reqRegister(uploadForm.value);
+    ElNotification({
+      type: "success",
+      message: "Account created successfully!",
+    });
+    router.push({ path: "/account/details" });
   } else {
     alert("Please fill all information");
   }

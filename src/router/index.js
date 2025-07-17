@@ -5,7 +5,6 @@ const router = createRouter({
   routes: [
     {
       path: "/",
-      redirect: "/home",
       children: [
         {
           path: "home",
@@ -28,9 +27,21 @@ const router = createRouter({
           name: "Login",
         },
         {
-          path: "register",
-          component: () => import("@/views/Register.vue"),
-          name: "Register",
+          path: "account",
+          component: () => import("@/views/Account/Account.vue"),
+          name: "Account",
+          children: [
+            {
+              path: "details",
+              component: () => import("@/views/Account/Details.vue"),
+              name: "Deatils",
+            },
+            {
+              path: "address",
+              component: () => import("@/views/Account/Address.vue"),
+              name: "Address",
+            },
+          ],
         },
       ],
     },
@@ -41,17 +52,17 @@ const router = createRouter({
     },
   ],
 });
-router.beforeEach((to, from) => {
-  const userStore = useUserStore();
-  let token = userStore.token;
-  if (token) {
-    return true;
-  } else {
-    if (to.path == "/login" || to.path == "/register") {
-      return true;
-    } else {
-      return { path: "/login" };
-    }
-  }
-});
+// router.beforeEach((to, from) => {
+//   const userStore = useUserStore();
+//   let token = userStore.token;
+//   if (token) {
+//     return true;
+//   } else {
+//     if (to.path == "/login" || to.path == "/register") {
+//       return true;
+//     } else {
+//       return { path: "/login" };
+//     }
+//   }
+// });
 export default router;

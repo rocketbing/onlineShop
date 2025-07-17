@@ -1,5 +1,8 @@
 <template>
-  <BFormGroup :label="inputAttrs.placeholder" :label-for="inputAttrs.model">
+  <BFormGroup
+    :label="inputAttrs.type !== 'search' ? inputAttrs.placeholder : ''"
+    :label-for="inputAttrs.model"
+  >
     <!-- 普通输入框和控件 -->
     <template v-if="inputAttrs.type !== 'password'">
       <!-- Select -->
@@ -72,7 +75,9 @@
         :id="inputAttrs.model"
         v-model="modelValueProxy"
         :type="inputAttrs.type || 'text'"
+        :class="inputAttrs.class"
         :name="inputAttrs.model"
+        :placeholder="inputAttrs.placeholder"
         :state="state"
       />
     </template>

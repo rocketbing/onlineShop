@@ -42,7 +42,7 @@ request.interceptors.request.use(
 );
 request.interceptors.response.use(
   (response) => {
-    if (response.status == 200) {
+    if (response.status == 201 || response.status == 200) {
       return response.data || response;
     } else {
       ElNotification({

@@ -5,30 +5,45 @@
         <span>$25 Off $100 with Code: EARLYFALL - Exculsion Apply</span>
       </div>
     </div>
-    <div class="row mainHeader">
-      <div class="col-7">
-        <img src="#" alt="公司Logo" />
+    <nav class="navbar navbar-expand-lg mainHeader w-100">
+      <div class="container-fluid">
+        <img class="navbar-brand" src="#" alt="公司Logo" />
+        <button
+          class="navbar-toggler"
+          type="button"
+          data-bs-toggle="collapse"
+          data-bs-target="#mynavbar"
+        >
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="mynavbar">
+          <div class="navbar-nav d-flex custom-nav-content">
+            <font-awesome-icon
+              icon="user"
+              @click="goToAccount"
+              class="icon nav-item"
+            />
+            <font-awesome-icon
+              icon="bag-shopping"
+              @click="goToMyCart"
+              class="icon nav-item"
+            />
+            <BForm class="d-flex" role="search" @submit.prevent="searchHandler">
+              <CustomInput
+                :inputAttrs="{
+                  class: 'form-control',
+                  type: 'search',
+                  placeholder: 'Search',
+                }"
+              />
+              <button class="btn btn-outline-success ms-2" type="submit">
+                Search
+              </button>
+            </BForm>
+          </div>
+        </div>
       </div>
-      <div class="col-4">
-        <form class="d-flex" role="search">
-          <input
-            class="form-control me-2"
-            type="search"
-            placeholder="Search"
-            aria-label="Search"
-          />
-          <button class="btn btn-outline-success" type="submit">Search</button>
-        </form>
-      </div>
-      <div class="col-1 d-flex justify-content-between align-items-center">
-        <font-awesome-icon icon="user" @click="goToLogin" class="icon" />
-        <font-awesome-icon
-          icon="bag-shopping"
-          @click="goToMyCart"
-          class="icon"
-        />
-      </div>
-    </div>
+    </nav>
     <el-menu
       :default-active="activeIndex"
       class="el-menu-demo"
@@ -56,6 +71,11 @@
 <script lang="ts" setup>
 import { ref } from "vue";
 import { useRouter } from "vue-router";
+import CustomInput from "./CustomInput.vue";
+import { BForm, BButton } from "bootstrap-vue-next";
+function searchHandler() {
+  console.log(1);
+}
 const router = useRouter();
 const activeIndex = ref("");
 const handleSelect = (key: string, keyPath: string[]) => {
@@ -63,8 +83,8 @@ const handleSelect = (key: string, keyPath: string[]) => {
 };
 let remaining = ref("");
 let timer: number;
-function goToLogin() {
-  router.push("/login");
+function goToAccount() {
+  router.push("/account/details");
 }
 function goToMyCart() {
   console.log("Go to My Cart");
@@ -80,9 +100,19 @@ function goToMyCart() {
     margin: auto;
   }
 }
-.mainHeader {
-  padding: 10px 20px;
-  .icon:hover {
+.custom-nav-content {
+  flex-direction: column; // 默认竖排（小屏）
+  align-items: flex-start;
+  gap: 1rem;
+
+  @media (min-width: 992px) {
+    // lg 以上屏幕
+    flex-direction: row;
+    align-items: center;
+    margin-left: auto; // 推到右边
+  }
+
+  .icon {
     cursor: pointer;
   }
 }
